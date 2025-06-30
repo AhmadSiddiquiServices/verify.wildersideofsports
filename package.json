@@ -1,0 +1,19 @@
+{
+  "name": "cert-wilder-verify-app",
+  "version": "1.0.0",
+  "description": "The External Verification functionality for Products Codes from DB.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon api/index.js"
+  },
+  "author": "Ahmad Siddiqui",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
