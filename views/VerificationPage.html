@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Authenticity</title>
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="left-banner">
+        <div class="overlay-text">
+          <h1>VERIFY AUTHENTICITY</h1>
+          <div class="line"></div>
+        </div>
+      </div>
+
+      <div class="right-form">
+        <div id="verify-form">
+          <h2>VERIFY LOOKUP</h2>
+          <div class="form-line"></div>
+          <input
+            type="text"
+            id="certCode"
+            placeholder="ENTER JSA CERTIFICATION #"
+          />
+          <button onclick="verifyCode()">VERIFY</button>
+        </div>
+
+        <div class="verify-section">
+          <!-- <div id="verify-result" class="hidden">
+            <h3>Results:</h3>
+            <div class="form-line"></div>
+            <p id="resultText"></p>
+
+            <button onclick="goBackToForm()" class="back-button">
+              Verify Another Certificate
+            </button>
+          </div> -->
+          <div id="verify-result" class="hidden">
+            <h3 id="result-heading" class="hidden">Results:</h3>
+            <div id="result-line" class="form-line hidden"></div>
+            <p id="resultText"></p>
+            <button
+              id="back-button"
+              onclick="goBackToForm()"
+              class="back-button hidden"
+            >
+              Verify Another Certificate
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function verifyCode() {
+        const code = document.getElementById("certCode").value.trim();
+        if (!code) return;
+
+        // Hide form and show result section
+        document.getElementById("verify-form").style.display = "none";
+        const resultSection = document.getElementById("verify-result");
+        resultSection.classList.remove("hidden");
+
+        // Hide elements before result loads
+        document.getElementById("result-heading").classList.add("hidden");
+        document.getElementById("result-line").classList.add("hidden");
+        document.getElementById("back-button").classList.add("hidden");
+
+        // Show loader
+        document.getElementById("resultText").innerHTML = `
+          <div class="loader-wrapper">
+            <img src="/images/loader.gif" alt="Loading..." class="loader-icon" />
+          </div>
+        `;
+
+        try {
+          const response = await fetch(
+            `/api/verify/certificate?code=${encodeURIComponent(code)}`
+          );
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Invalid code or server error");
+          }
+
+          // Show results
+          document.getElementById("resultText").innerHTML = `
+            <img
+              class="tick"
+              src="/images/tick.gif"
+              alt="Valid"
+              width="60"
+              height="60"
+              style="margin: 0; vertical-align: middle;"
+            />
+            <span>Valid Code</span><br>
+            <strong>Cert Number:</strong> ${data.data.certNumber}<br>
+            <strong>Signer:</strong> ${data.data.signer}<br>
+            <strong>Item:</strong> ${data.data.itemType}
+          `;
+
+          // Show heading, line, and button after successful fetch
+          document.getElementById("result-heading").classList.remove("hidden");
+          document.getElementById("result-line").classList.remove("hidden");
+          document.getElementById("back-button").classList.remove("hidden");
+        } catch (error) {
+          console.error(error);
+
+          // Show error result with same structure
+          document.getElementById("resultText").innerHTML = `
+    <img
+      class="tick"
+      src="/images/fail.gif"
+      alt="Invalid"
+      width="60"
+      height="60"
+      style="margin: 0; vertical-align: middle;"
+    />
+    <span class="error-text">Invalid Code</span><br>
+    <strong class="error-text">Reason:</strong> ${error.message}
+  `;
+
+          // Show heading, line, and button even on error
+          document.getElementById("result-heading").classList.remove("hidden");
+          document.getElementById("result-line").classList.remove("hidden");
+          document.getElementById("back-button").classList.remove("hidden");
+        }
+
+        // catch (error) {
+        //   console.error(error);
+        //   document.getElementById(
+        //     "resultText"
+        //   ).innerHTML = `❌ ${error.message}`;
+        //   document.getElementById("back-button").classList.remove("hidden");
+        // }
+      }
+
+      function goBackToForm() {
+        // Hide result, show form
+        document.getElementById("verify-result").classList.add("hidden");
+        document.getElementById("verify-form").style.display = "block";
+
+        // Clear input and result text
+        document.getElementById("certCode").value = "";
+        document.getElementById("resultText").innerHTML = "";
+      }
+    </script>
+  </body>
+</html>

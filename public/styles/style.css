@@ -1,0 +1,217 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  flex-wrap: wrap;
+}
+
+.left-banner {
+  flex: 1 1 50%;
+  background: url("/images/verify-header.jpg") center center/cover no-repeat;
+  position: relative;
+  color: white;
+  min-height: 300px;
+}
+
+.overlay-text {
+  position: absolute;
+  bottom: 50%;
+  left: 20%;
+}
+
+.overlay-text h1 {
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+
+.line {
+  width: 60px;
+  height: 3px;
+  background: #f1c40f;
+  margin-top: 8px;
+}
+
+.right-form {
+  flex: 1 1 50%;
+  background-color: #141111;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+#verify-form,
+#verify-result {
+  width: 100%;
+  max-width: 400px;
+}
+
+.verify-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#verify-form h2 {
+  margin-bottom: 6px;
+  font-size: 22px;
+}
+
+.form-line {
+  width: 40px;
+  height: 2px;
+  background: #f1c40f;
+  margin-bottom: 30px;
+}
+
+#verify-form input {
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  background-color: #141111;
+  color: white;
+  border: 1px solid #888;
+  margin-bottom: 20px;
+  outline: none;
+}
+
+#verify-form button {
+  width: 120px;
+  padding: 12px;
+  background: white;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 3px solid #f1c40f;
+}
+
+#verify-result h3 {
+  margin-bottom: 10px;
+  font-size: 30px;
+  text-transform: uppercase;
+}
+
+.hidden {
+  display: none;
+}
+
+.tick {
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+/* 🔁 Responsive Media Queries */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left-banner,
+  .right-form {
+    flex: 1 1 100%;
+    min-height: 300px;
+  }
+
+  .overlay-text h1 {
+    font-size: 1.6rem;
+  }
+
+  #verify-form,
+  #verify-result {
+    max-width: 90%;
+  }
+
+  .verify-section {
+    width: 100%;
+  }
+}
+
+/* Loader */
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+.loader-icon {
+  width: 200px;
+  height: 200px;
+}
+
+.hidden {
+  display: none;
+}
+
+#resultText strong {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #f1c40f;
+}
+
+#back-button {
+  padding: 12px;
+  background: none;
+  color: #f1c40f;
+  border: 3px solid #f1c40f;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 20px;
+  margin-top: 50px;
+}
+
+#resultText span {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #0fa564;
+  font-size: 18px;
+}
+
+.error-text {
+  color: red !important;
+}
+
+#add-cert-form {
+  display: block;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+}
+
+.form input {
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  background-color: #141111;
+  color: white;
+  border: 1px solid #888;
+  margin-bottom: 20px;
+  outline: none;
+}
+
+.form button {
+  width: 120px;
+  padding: 12px;
+  background: white;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 3px solid #f1c40f;
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add New Certificate</title>
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Left side: Form -->
+      <div class="right-form">
+        <div id="add-cert-form">
+          <h2>ADD NEW CERTIFICATE</h2>
+          <div class="form-line"></div>
+
+          <div class="form">
+            <input type="text" id="certNumber" placeholder="CERT NUMBER" />
+            <input type="text" id="signer" placeholder="SIGNER NAME" />
+            <input type="text" id="itemType" placeholder="ITEM TYPE" />
+
+            <button onclick="addCertificate()">SUBMIT</button>
+          </div>
+
+          <p id="add-result" style="margin-top: 20px"></p>
+        </div>
+      </div>
+
+      <!-- Right side: Banner -->
+      <div
+        class="left-banner"
+        style="
+          background: url('/images/form.jpg') center center/cover no-repeat;
+        "
+      >
+        <div class="overlay-text">
+          <h1>ADD CERTIFICATE</h1>
+          <div class="line"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function addCertificate() {
+        const certNumber = document.getElementById("certNumber").value.trim();
+        const signer = document.getElementById("signer").value.trim();
+        const itemType = document.getElementById("itemType").value.trim();
+
+        if (!certNumber || !signer || !itemType) {
+          document.getElementById("add-result").innerHTML =
+            "<span class='error-text'>All fields are required.</span>";
+          return;
+        }
+
+        document.getElementById("add-result").innerHTML = "Submitting...";
+
+        try {
+          const response = await fetch("/api/certificates", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ certNumber, signer, itemType }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Something went wrong.");
+          }
+
+          document.getElementById("add-result").innerHTML =
+            "<span style='color: #0fa564;'>✅ Certificate added successfully!</span>";
+
+          // Clear form
+          document.getElementById("certNumber").value = "";
+          document.getElementById("signer").value = "";
+          document.getElementById("itemType").value = "";
+        } catch (error) {
+          console.error(error);
+          document.getElementById("add-result").innerHTML = `
+            <span class="error-text">❌ ${error.message}</span>
+          `;
+        }
+      }
+    </script>
+  </body>
+</html>
