@@ -7,8 +7,26 @@
     <link rel="stylesheet" href="/styles/style.css" />
   </head>
   <body>
+    <div class="header">
+      <div class="logo">
+        <a href="/">
+          <img src="/images/logo.png" alt="Logo" />
+        </a>
+      </div>
+      <div class="profile">
+        <img
+          class="tick"
+          src="/images/logout.gif"
+          alt="logout"
+          width="60"
+          height="60"
+          onclick="logout()"
+        />
+      </div>
+    </div>
+
     <div class="container">
-      <!-- Left side: Form -->
+      <!-- Right side: Form -->
       <div class="right-form">
         <div id="add-cert-form">
           <h2>ADD NEW CERTIFICATE</h2>
@@ -26,11 +44,11 @@
         </div>
       </div>
 
-      <!-- Right side: Banner -->
+      <!-- Left side: Banner -->
       <div
         class="left-banner"
         style="
-          background: url('/images/form.jpg') center center/cover no-repeat;
+          background: url('/images/img-5.jpg') center center/cover no-repeat;
         "
       >
         <div class="overlay-text">
@@ -40,7 +58,22 @@
       </div>
     </div>
 
+    <!-- Logout Code -->
     <script>
+      function logout() {
+        localStorage.removeItem("authToken");
+        window.location.href = "/";
+      }
+    </script>
+
+    <!-- Add Certificate Code -->
+    <script>
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        // Redirect back to home (login)
+        window.location.href = "/";
+      }
       async function addCertificate() {
         const certNumber = document.getElementById("certNumber").value.trim();
         const signer = document.getElementById("signer").value.trim();
@@ -59,6 +92,7 @@
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ certNumber, signer, itemType }),
           });
