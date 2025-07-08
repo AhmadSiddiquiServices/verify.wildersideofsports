@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Certificates in Bulk</title>
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">
+        <a href="/">
+          <img src="/images/logo.png" alt="Logo" />
+        </a>
+      </div>
+      <div class="profile">
+        <img
+          class="tick"
+          src="/images/logout.gif"
+          alt="logout"
+          width="60"
+          height="60"
+          onclick="logout()"
+        />
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Left side: Banner -->
+      <div
+        class="left-banner"
+        style="
+          background: url('/images/img-4.jpg') center center/cover no-repeat;
+        "
+      >
+        <div class="overlay-text">
+          <h1>UPLOAD CERTIFICATES</h1>
+          <div class="line"></div>
+        </div>
+      </div>
+
+      <!-- Right Upload Box -->
+      <div class="right-form">
+        <div class="upload-box">
+          <img
+            class="tick"
+            src="/images/upload.gif"
+            alt="upload"
+            width="150"
+            height="150"
+          />
+          <h3>Upload Excel</h3>
+          <p>Excel file must be less than 2MB</p>
+
+          <input type="file" id="excelFile" accept=".xlsx" />
+          <label for="excelFile">Select File</label>
+
+          <div class="upload-result" id="upload-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Code -->
+    <script>
+      function logout() {
+        localStorage.removeItem("authToken");
+        window.location.href = "/";
+      }
+    </script>
+
+    <!-- Add Certificate Code -->
+    <script>
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        // Redirect back to home (login)
+        window.location.href = "/";
+      }
+      document
+        .getElementById("excelFile")
+        .addEventListener("change", async function () {
+          const file = this.files[0];
+          if (!file) return;
+
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const resultDiv = document.getElementById("upload-result");
+          resultDiv.innerText = "Uploading...";
+
+          try {
+            const response = await fetch("/api/certificates/upload", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Upload failed.");
+
+            resultDiv.innerHTML = `<span style="color: green;">✅ ${data.insertedCount} added, ${data.skippedCount} skipped (duplicates)</span>`;
+          } catch (err) {
+            resultDiv.innerHTML = `<span style="color: red;">❌ ${err.message}</span>`;
+          }
+        });
+    </script>
+  </body>
+</html>

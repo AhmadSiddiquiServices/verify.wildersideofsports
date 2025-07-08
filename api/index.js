@@ -34,6 +34,10 @@ app.get("/add/certificate", (_req, res) => {
   res.sendFile(path.join(__dirname, "../views/AddCertificatePage.html"));
 });
 
+app.get("/add/certificates-bulk", (_req, res) => {
+  res.sendFile(path.join(__dirname, "../views/AddCertificateBulk.html"));
+});
+
 app.listen(port, () => {
   console.log(`✅ Server is running at http://localhost:${port}`);
 });

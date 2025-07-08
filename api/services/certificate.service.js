@@ -1,6 +1,6 @@
-const Certificate = require("../db/Models/Certificate.Schema");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Certificate = require("../db/Models/Certificate.Schema");
 const User = require("../db/Models/UserSchema");
 
 const createCertificate = async ({ certNumber, signer, itemType }) => {
@@ -42,8 +42,37 @@ const adminLogin = async (userName, password) => {
   return { success: true, token };
 };
 
+const uploadCertificates = async (data) => {
+  let insertedCount = 0;
+  let skippedCount = 0;
+
+  for (const row of data) {
+    const certNumber = row.certNumber || row.CERTNUMBER || row["CERT NUMBER"];
+    const signer = row.signer || row.SIGNER;
+    const itemType = row.itemType || row["ITEM TYPE"];
+
+    if (!certNumber) {
+      skippedCount++;
+      continue;
+    }
+
+    const exists = await Certificate.findOne({ certNumber });
+    if (exists) {
+      skippedCount++;
+      continue;
+    }
+
+    const cert = new Certificate({ certNumber, signer, itemType });
+    await cert.save();
+    insertedCount++;
+  }
+
+  return { insertedCount, skippedCount };
+};
+
 module.exports = {
   createCertificate,
   verifyCertificate,
   adminLogin,
+  uploadCertificates,
 };

@@ -1,3 +1,4 @@
+const xlsx = require("xlsx");
 const certificateService = require("../services/certificate.service");
 
 const createCertificate = async (req, res) => {
@@ -73,8 +74,34 @@ const adminLogin = async (req, res) => {
   }
 };
 
+const uploadCertificates = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet); // Converts to array of objects
+
+    const { insertedCount, skippedCount } =
+      await certificateService.uploadCertificates(data);
+
+    return res.status(200).json({
+      message: "Upload completed",
+      insertedCount,
+      skippedCount,
+    });
+  } catch (error) {
+    console.error("Error uploading certificates:", error);
+    return res.status(500).json({ error: "Server error during upload" });
+  }
+};
+
 module.exports = {
   createCertificate,
   verifyCertificate,
   adminLogin,
+  uploadCertificates,
 };
