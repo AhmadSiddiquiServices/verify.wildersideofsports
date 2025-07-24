@@ -99,9 +99,95 @@ const uploadCertificates = async (req, res) => {
   }
 };
 
+const listCertificates = async (req, res) => {
+  try {
+    const { page = 1, limit = 30, search = "" } = req.query;
+
+    const query = search
+      ? {
+          $or: [
+            { certNumber: { $regex: search, $options: "i" } },
+            { signer: { $regex: search, $options: "i" } },
+            { itemType: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const { data, totalPages } = await certificateService.listCertificates(
+      parseInt(page),
+      parseInt(limit),
+      query
+    );
+
+    res.json({ data, totalPages });
+  } catch (err) {
+    console.error("Error fetching certificates:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const getSingleCertificate = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { success, data, error } =
+      await certificateService.getSingleCertificate(id);
+
+    if (!success) {
+      return res.status(404).json({ error });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error("Error fetching certificate:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// PUT /api/certificates/:id
+const updateCertificate = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { success, data, error } = await certificateService.updateCertificate(
+      id,
+      req.body
+    );
+
+    if (!success) {
+      return res.status(404).json({ error });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const deleteCertificate = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { success, error } = await certificateService.deleteCertificate(id);
+
+    if (!success) {
+      return res.status(404).json({ error });
+    }
+
+    res.json({ message: "Certificate deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting certificate:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports = {
   createCertificate,
   verifyCertificate,
   adminLogin,
   uploadCertificates,
+  listCertificates,
+  getSingleCertificate,
+  updateCertificate,
+  deleteCertificate,
 };

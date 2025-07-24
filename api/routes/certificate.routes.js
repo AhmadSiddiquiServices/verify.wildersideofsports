@@ -7,7 +7,7 @@ const verifyToken = require("../middlewares/auth.middleware");
 const storage = multer.memoryStorage(); // keeps the file in memory
 const upload = multer({ storage });
 
-// router.get('/api/certificates/:id', certificateController.getCertificateById);
+router.post("/admin/login", certificateController.adminLogin);
 router.get("/verify/certificate", certificateController.verifyCertificate);
 router.post(
   "/certificates",
@@ -20,8 +20,26 @@ router.post(
   upload.single("file"),
   certificateController.uploadCertificates
 );
-router.post("/admin/login", certificateController.adminLogin);
-// router.put('/api/certificates/:id', certificateController.updateCertificate);
-// router.delete('/api/certificates/:id', certificateController.deleteCertificate);
+router.get("/verify/certificate", certificateController.verifyCertificate);
+router.get(
+  "/certificates",
+  verifyToken,
+  certificateController.listCertificates
+);
+router.get(
+  "/certificates/:id",
+  verifyToken,
+  certificateController.getSingleCertificate
+);
+router.put(
+  "/certificates/:id",
+  verifyToken,
+  certificateController.updateCertificate
+);
+router.delete(
+  "/certificates/:id",
+  verifyToken,
+  certificateController.deleteCertificate
+);
 
 module.exports = router;

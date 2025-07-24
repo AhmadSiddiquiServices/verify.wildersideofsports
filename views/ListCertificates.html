@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Certificates</title>
+    <link rel="stylesheet" href="/styles/style.css" />
+
+    <style>
+      .loader-overlay {
+        position: absolute;
+        top: 12vh;
+        left: 0;
+        background: rgba(0, 0, 0, 0.7);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99;
+      }
+
+      .loader-wrapper img.loader-icon {
+        width: 200px;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body id="certListPage">
+    <div class="header">
+      <div class="logo">
+        <a href="/">
+          <img src="/images/logo.png" alt="Logo" />
+        </a>
+      </div>
+
+      <div class="desk-menu">
+        <li><a href="/">VERIFY</a></li>
+        <li><a href="/add/certificate">ADD</a></li>
+        <li><a href="/certificates">CERTIFICATES</a></li>
+      </div>
+
+      <div class="profile">
+        <img
+          class="tick"
+          src="/images/logout.gif"
+          alt="logout"
+          width="60"
+          height="60"
+          onclick="logout()"
+        />
+      </div>
+    </div>
+
+    <div class="mob-menu">
+      <li><a href="/">VERIFY</a></li>
+      <li><a href="/add/certificate">ADD</a></li>
+      <li><a href="/certificates">CERTIFICATES</a></li>
+    </div>
+
+    <div class="cert-list-page">
+      <!-- Loader -->
+      <div id="certListLoader" class="loader-overlay hidden">
+        <div class="loader-wrapper">
+          <img src="/images/loader.gif" alt="Loading..." class="loader-icon" />
+        </div>
+      </div>
+      <div class="cert-list-header">
+        <h2>CERTIFICATES LIST</h2>
+        <input
+          type="text"
+          id="searchInput"
+          class="cert-search-input"
+          placeholder="🔍 Search by certificate number..."
+        />
+      </div>
+
+      <div class="cert-table-container">
+        <table class="cert-table">
+          <thead>
+            <tr>
+              <th>Cert Number</th>
+              <th>Signer</th>
+              <th>Item Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="certTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Are you sure you want to delete this certificate?</h3>
+        <!-- <button class="btn-danger" onclick="confirmDelete()">Delete</button> -->
+        <button class="btn-danger" onclick="confirmDelete()">Delete</button>
+        <button class="btn-secondary" onclick="closeDeletePopup()">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("authToken");
+      if (!token) window.location.href = "/";
+
+      let currentPage = 1;
+      let searchQuery = "";
+      let certToDeleteId = null;
+
+      async function fetchCertificates(page = 1) {
+        const loader = document.getElementById("certListLoader");
+        loader.classList.remove("hidden");
+
+        try {
+          const res = await fetch(
+            `/api/certificates?page=${page}&search=${encodeURIComponent(
+              searchQuery
+            )}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const { data, totalPages } = await res.json();
+
+          const tbody = document.getElementById("certTableBody");
+          const paginationDiv = document.getElementById("pagination");
+
+          if (!data.length) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="4" class="no-data-cell">
+                  <img src="/images/no-data.gif" alt="no-data" />
+                </td>
+              </tr>
+            `;
+            paginationDiv.innerHTML = "";
+          } else {
+            tbody.innerHTML = data
+              .map(
+                (cert) => `
+                <tr>
+                  <td>${cert.certNumber}</td>
+                  <td>${cert.signer}</td>
+                  <td>${cert.itemType}</td>
+                  <td>
+                    <img
+                      class="actions"
+                      src="/images/edit.png"
+                      alt="edit"
+                      onclick="editCert('${cert._id}')"
+                    />
+                    <img
+                      class="actions"
+                      src="/images/delete.png"
+                      alt="delete"
+                      onclick="openDeleteModal('${cert._id}')"
+                    />
+                  </td>
+                </tr>
+              `
+              )
+              .join("");
+
+            paginationDiv.innerHTML = Array.from(
+              { length: totalPages },
+              (_, i) =>
+                `<button onclick="changePage(${i + 1})">${i + 1}</button>`
+            ).join(" ");
+          }
+        } catch (err) {
+          console.error("Fetch error:", err);
+        } finally {
+          loader.classList.add("hidden");
+        }
+      }
+
+      function changePage(page) {
+        currentPage = page;
+        fetchCertificates(page);
+      }
+
+      function editCert(id) {
+        window.location.href = `/edit/certificate?id=${id}`;
+      }
+
+      function deleteCert(id) {
+        certToDeleteId = id;
+        document.getElementById("deleteModal").classList.remove("hidden");
+      }
+
+      async function confirmDelete() {
+        if (!certToDeleteId) return;
+
+        await fetch(`/api/certificates/${certToDeleteId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        certToDeleteId = null;
+        closeDeletePopup();
+        fetchCertificates(currentPage);
+      }
+
+      // function openDeleteModal(id) {
+      //   const modal = document.getElementById("deleteModal");
+      //   modal.classList.remove("hidden");
+      //   document.getElementById("confirmDeleteBtn").onclick = () =>
+      //     deleteCert(id);
+      // }
+
+      function openDeleteModal(id) {
+        certToDeleteId = id;
+        document.getElementById("deleteModal").classList.remove("hidden");
+      }
+
+      function closeDeletePopup() {
+        document.getElementById("deleteModal").classList.add("hidden");
+      }
+
+      document.getElementById("searchInput").addEventListener("input", (e) => {
+        searchQuery = e.target.value.trim();
+        fetchCertificates(1);
+      });
+
+      function logout() {
+        localStorage.removeItem("authToken");
+        window.location.href = "/";
+      }
+
+      fetchCertificates();
+    </script>
+  </body>
+</html>

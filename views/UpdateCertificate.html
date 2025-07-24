@@ -38,51 +38,32 @@
     </div>
 
     <div class="container">
-      <!-- Right side: Form -->
+      <!-- Left side: Form -->
       <div class="right-form">
         <div id="add-cert-form">
-          <h2>ADD NEW CERTIFICATE</h2>
+          <h2>Edit Certificate</h2>
           <div class="form-line"></div>
 
           <div class="form">
             <input type="text" id="certNumber" placeholder="CERT NUMBER" />
             <input type="text" id="signer" placeholder="SIGNER NAME" />
             <input type="text" id="itemType" placeholder="ITEM TYPE" />
-
-            <button onclick="addCertificate()">SUBMIT</button>
+            <button onclick="updateCertificate()">UPDATE</button>
           </div>
 
-          <p id="add-result" style="margin-top: 20px"></p>
+          <p id="update-result" style="margin-top: 20px"></p>
         </div>
-
-        <!-- Upload Option Trigger -->
-        <p style="margin-top: 30px; font-size: 14px; color: #ccc">
-          Want to add multiple certificates at once?
-          <a
-            href="/add/certificates-bulk"
-            style="
-              margin-left: 10px;
-              padding: 6px 12px;
-              background: none;
-              border: 2px solid #f1c40f;
-              color: #f1c40f;
-              cursor: pointer;
-            "
-          >
-            Upload Excel
-          </a>
-        </p>
       </div>
 
-      <!-- Left side: Banner -->
+      <!-- Right side: Banner -->
       <div
         class="left-banner"
         style="
-          background: url('/images/img-5.jpg') center center/cover no-repeat;
+          background: url('/images/img-2.jpg') center center/cover no-repeat;
         "
       >
         <div class="overlay-text">
-          <h1>ADD CERTIFICATE</h1>
+          <h1>EDIT CERTIFICATE</h1>
           <div class="line"></div>
         </div>
       </div>
@@ -96,30 +77,47 @@
       }
     </script>
 
-    <!-- Add Certificate Code -->
     <script>
       const token = localStorage.getItem("authToken");
+      const certId = new URLSearchParams(window.location.search).get("id");
 
-      if (!token) {
-        // Redirect back to home (login)
-        window.location.href = "/";
+      async function fetchData() {
+        try {
+          const res = await fetch(`/api/certificates/${certId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          console.log("Client Side ==> ", data);
+          if (res.ok) {
+            document.getElementById("certNumber").value = data.certNumber;
+            document.getElementById("signer").value = data.signer;
+            document.getElementById("itemType").value = data.itemType;
+          } else {
+            document.getElementById("update-result").innerText =
+              "Failed to load data";
+          }
+        } catch (err) {
+          document.getElementById("update-result").innerText =
+            "Error fetching data";
+        }
       }
-      async function addCertificate() {
+
+      fetchData();
+
+      async function updateCertificate() {
         const certNumber = document.getElementById("certNumber").value.trim();
         const signer = document.getElementById("signer").value.trim();
         const itemType = document.getElementById("itemType").value.trim();
 
         if (!certNumber || !signer || !itemType) {
-          document.getElementById("add-result").innerHTML =
-            "<span class='error-text'>All fields are required.</span>";
+          document.getElementById("update-result").innerText =
+            "All fields are required.";
           return;
         }
 
-        document.getElementById("add-result").innerHTML = "Submitting...";
-
         try {
-          const response = await fetch("/api/certificates", {
-            method: "POST",
+          const res = await fetch(`/api/certificates/${certId}`, {
+            method: "PUT",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
@@ -127,24 +125,18 @@
             body: JSON.stringify({ certNumber, signer, itemType }),
           });
 
-          const data = await response.json();
+          const data = await res.json();
 
-          if (!response.ok) {
-            throw new Error(data.error || "Something went wrong.");
+          if (!res.ok) {
+            throw new Error(data.error || "Update failed");
           }
 
-          document.getElementById("add-result").innerHTML =
-            "<span style='color: #0fa564;'>✅ Certificate added successfully!</span>";
-
-          // Clear form
-          document.getElementById("certNumber").value = "";
-          document.getElementById("signer").value = "";
-          document.getElementById("itemType").value = "";
+          document.getElementById("update-result").innerText =
+            "✅ Certificate updated successfully!";
         } catch (error) {
-          console.error(error);
-          document.getElementById("add-result").innerHTML = `
-            <span class="error-text">❌ ${error.message}</span>
-          `;
+          document.getElementById(
+            "update-result"
+          ).innerText = `❌ ${error.message}`;
         }
       }
     </script>

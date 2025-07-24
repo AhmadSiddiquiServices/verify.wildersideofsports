@@ -70,9 +70,75 @@ const uploadCertificates = async (data) => {
   return { insertedCount, skippedCount };
 };
 
+const listCertificates = async (page, limit, query) => {
+  const total = await Certificate.countDocuments(query);
+  const totalPages = Math.ceil(total / limit);
+
+  const data = await Certificate.find(query)
+    .sort({ _id: 1 }) // Use _id for stable, unique sorting
+    .skip((page - 1) * limit)
+    .limit(parseInt(limit));
+
+  return {
+    data,
+    totalPages,
+  };
+};
+
+const getSingleCertificate = async (id) => {
+  const certificate = await Certificate.findOne({ _id: id });
+
+  if (!certificate) {
+    return { success: false, error: "Certificate not found" };
+  }
+
+  return {
+    success: true,
+    data: certificate,
+  };
+};
+
+const updateCertificate = async (id, body) => {
+  const { certNumber, signer, itemType } = body;
+
+  const updated = await Certificate.findByIdAndUpdate(
+    id,
+    { certNumber, signer, itemType },
+    { new: true }
+  );
+
+  if (!updated) {
+    return { success: false, error: "Certificate not found" };
+  }
+
+  return {
+    success: true,
+    data: updated,
+  };
+};
+
+const deleteCertificate = async (id) => {
+  const deleted = await Certificate.findByIdAndDelete(id);
+
+  if (!deleted) {
+    return { success: false, error: "Certificate not found" };
+  }
+
+  return { success: true };
+};
+
+module.exports = {
+  // other exports
+  deleteCertificate,
+};
+
 module.exports = {
   createCertificate,
   verifyCertificate,
   adminLogin,
   uploadCertificates,
+  listCertificates,
+  getSingleCertificate,
+  updateCertificate,
+  deleteCertificate,
 };
