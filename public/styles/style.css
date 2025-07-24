@@ -687,3 +687,10 @@ body {
   background-color: #6c757d !important;
   color: white !important;
 }
+
+.login-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
