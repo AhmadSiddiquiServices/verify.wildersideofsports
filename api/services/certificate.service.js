@@ -128,11 +128,6 @@ const deleteCertificate = async (id) => {
 };
 
 module.exports = {
-  // other exports
-  deleteCertificate,
-};
-
-module.exports = {
   createCertificate,
   verifyCertificate,
   adminLogin,
