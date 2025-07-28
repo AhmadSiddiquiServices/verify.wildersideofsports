@@ -47,9 +47,14 @@ const uploadCertificates = async (data) => {
   let skippedCount = 0;
 
   for (const row of data) {
-    const certNumber = row.certNumber || row.CERTNUMBER || row["CERT NUMBER"];
-    const signer = row.signer || row.SIGNER;
-    const itemType = row.itemType || row["ITEM TYPE"];
+    const certNumber =
+      row.certNumber ||
+      row.CERTNUMBER ||
+      row["CERT NUMBER"] ||
+      row["Cert Number"];
+    const signer =
+      row.signer || row.SIGNER || row["SIGNER NAME"] || row["Signer Name"];
+    const itemType = row.itemType || row["ITEM TYPE"] || row["Item Type"];
 
     if (!certNumber) {
       skippedCount++;
