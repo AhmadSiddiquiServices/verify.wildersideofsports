@@ -83,10 +83,16 @@ const uploadCertificates = async (req, res) => {
     const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const data = xlsx.utils.sheet_to_json(sheet); // Converts to array of objects
+    const file_data = xlsx.utils.sheet_to_json(sheet); // Converts to array of objects
 
-    const { insertedCount, skippedCount } =
-      await certificateService.uploadCertificates(data);
+    const { success, data, error } =
+      await certificateService.uploadCertificates(file_data);
+
+    if (!success) {
+      return res.status(400).json({ error });
+    }
+
+    const { insertedCount, skippedCount } = data;
 
     return res.status(200).json({
       message: "Upload completed",

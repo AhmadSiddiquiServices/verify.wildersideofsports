@@ -42,19 +42,71 @@ const adminLogin = async (userName, password) => {
   return { success: true, token };
 };
 
+// const uploadCertificates = async (data) => {
+//   let insertedCount = 0;
+//   let skippedCount = 0;
+
+//   for (const row of data) {
+//     const certNumber =
+//       row.certNumber ||
+//       row.CERTNUMBER ||
+//       row["CERT NUMBER"] ||
+//       row["Cert Number"];
+//     const signer =
+//       row.signer || row.SIGNER || row["SIGNER NAME"] || row["Signer Name"];
+//     const itemType = row.itemType || row["ITEM TYPE"] || row["Item Type"];
+
+//     if (!certNumber) {
+//       skippedCount++;
+//       continue;
+//     }
+
+//     const exists = await Certificate.findOne({ certNumber });
+//     if (exists) {
+//       skippedCount++;
+//       continue;
+//     }
+
+//     const cert = new Certificate({ certNumber, signer, itemType });
+//     await cert.save();
+//     insertedCount++;
+//   }
+
+//   return { insertedCount, skippedCount };
+// };
+
 const uploadCertificates = async (data) => {
   let insertedCount = 0;
   let skippedCount = 0;
 
+  // Strictly allowed column names
+  const validCertNumberKeys = ["CERT NUMBER", "Cert Number"];
+  const validSignerKeys = ["SIGNER NAME", "Signer Name"];
+  const validItemTypeKeys = ["ITEM TYPE", "Item Type"];
+
+  // Validate headers on the first row
+  const firstRow = data[0];
+  const rowKeys = Object.keys(firstRow);
+
+  const hasValidCert = rowKeys.some((k) => validCertNumberKeys.includes(k));
+  const hasValidSigner = rowKeys.some((k) => validSignerKeys.includes(k));
+  const hasValidItemType = rowKeys.some((k) => validItemTypeKeys.includes(k));
+
+  if (!hasValidCert || !hasValidSigner || !hasValidItemType) {
+    return {
+      success: false,
+      error:
+        "Invalid file format. Please ensure your file contains the correct column headers:\n" +
+        `- Certificate Number: CERT NUMBER / Cert Number\n` +
+        `- Signer: SIGNER NAME / Signer Name\n` +
+        `- Item Type: ITEM TYPE / Item Type`,
+    };
+  }
+
   for (const row of data) {
-    const certNumber =
-      row.certNumber ||
-      row.CERTNUMBER ||
-      row["CERT NUMBER"] ||
-      row["Cert Number"];
-    const signer =
-      row.signer || row.SIGNER || row["SIGNER NAME"] || row["Signer Name"];
-    const itemType = row.itemType || row["ITEM TYPE"] || row["Item Type"];
+    const certNumber = row["CERT NUMBER"] || row["Cert Number"];
+    const signer = row["SIGNER NAME"] || row["Signer Name"];
+    const itemType = row["ITEM TYPE"] || row["Item Type"];
 
     if (!certNumber) {
       skippedCount++;
@@ -72,7 +124,7 @@ const uploadCertificates = async (data) => {
     insertedCount++;
   }
 
-  return { insertedCount, skippedCount };
+  return { success: true, data: { insertedCount, skippedCount } };
 };
 
 const listCertificates = async (page, limit, query) => {
