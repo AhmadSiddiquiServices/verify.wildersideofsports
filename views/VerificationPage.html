@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -53,6 +53,13 @@
             placeholder="ENTER WSS CERTIFICATION #"
           />
           <button onclick="verifyCode()">VERIFY</button>
+          <p class="disclaimer">
+            NOTE: If your COA number doesn’t match, please email
+            <a href="mailto:mikew@wildersideofsports.com">
+              mikew@wildersideofsports.com
+            </a>
+            for assistance.
+          </p>
         </div>
 
         <div class="verify-section">
@@ -121,7 +128,7 @@
 
         try {
           const response = await fetch(
-            `/api/verify/certificate?code=${encodeURIComponent(code)}`
+            `/api/verify/certificate?code=${encodeURIComponent(code)}`,
           );
           const data = await response.json();
 
